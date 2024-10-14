@@ -37,7 +37,7 @@ class Player:
         for resource, amount in self.resources.items():
             print(f"{resource}: {amount}")
 
-# IA similar al jugador
+# IA
 class IA(Player):
     def __init__(self):
         super().__init__(name="IA")
