@@ -1,6 +1,6 @@
 import random
 
-MAP_SIZE = 2
+MAP_SIZE_BASE = 2
 
 # Diferentes tipos de territorios
 TERRAIN_TYPES = ['Pradera', 'Bosque', 'Montaña']
@@ -44,18 +44,19 @@ class IA(Player):
 
 # Territorio como una clase
 class Territory:
-    def __init__(self):
+    def __init__(self,difficulty):
         self.terrain = random.choice(TERRAIN_TYPES)
-        self.cost = random.randint(5,10)
+        self.cost = random.randint(5* difficulty,10 * difficulty)
         self.resources = random.choice(RESOURCE_TYPES)
         self.owner = '_'  # Sin conquistar: '_', Jugador: 'J', Computadora: 'C'
     
     def __str__(self):
-        return f"{self.terrain}-{self.resources}-{self.cost}$-#{self.owner}"    
+        return f"{self.terrain[0]}-{self.resources[0]}-{self.cost}$-#{self.owner}"    
 
 # Crear el mapa de territorios
-def create_map():
-    return [[Territory() for _ in range(MAP_SIZE)] for _ in range(MAP_SIZE)]
+def create_map(difficulty):
+    MAP_SIZE = difficulty * MAP_SIZE_BASE
+    return [[Territory(difficulty) for _ in range(MAP_SIZE)] for _ in range(MAP_SIZE)]
 
 # Mostrar el mapa
 def display_map(map_grid):
@@ -109,8 +110,9 @@ def player_turn(player, map_grid):
 
 # Turno de la IA
 def ia_turn(ia,map_grid):
+    map_size = len(map_grid)
     while True:
-        x, y = random.randint(0, MAP_SIZE - 1), random.randint(0, MAP_SIZE - 1)
+        x, y = random.randint(0, map_size - 1), random.randint(0, map_size - 1)
         if map_grid[x][y].owner == '_':
             map_grid[x][y].owner = 'C'  # 'C' para IA
             ia.add_resources(map_grid[x][y].resources)
@@ -126,6 +128,12 @@ def ia_turn(ia,map_grid):
                 ia.buy_terrain(map_grid[x][y].cost)
                 print(f"La IA ha conquistado tu territorio en ({x}, {y})")
             break
+def nivel():
+    while True:
+        difficulty = input("Selecciona la dificultad (1: Fácil, 2: Media, 3: Difícil): ")
+        if difficulty in ['1', '2', '3']:
+            return int(difficulty)
+        print("Dificultad no válida, intenta de nuevo.")
 
 # Verificar si hay territorios disponibles
 def is_game_over(map_grid):
@@ -149,9 +157,10 @@ def ganador(player, ia):
 
 def main():
     print("Inicio de juego")
+    dificultad = nivel()
     player = Player() #Jugador  
     ia= IA()   #IA
-    map_grid = create_map()  # Generación aleatoria del mapa
+    map_grid = create_map(dificultad)  # Generación aleatoria del mapa
     print(f"¡Bienvenido a Conquista de Territorios!")
 
     while not is_game_over(map_grid):
