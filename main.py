@@ -8,48 +8,39 @@ RESOURCE_TYPES = ['Agua', 'Madera', 'Comida']
 # Movimientos posibles en el combate
 MOVES = ['Piedra', 'Papel', 'Tijera'] 
 
-# Clase Jugador que acumula recursos
+# Clase Jugador que acumula recursos y puntuación
 class Player:
-    def __init__(self):        
+    def __init__(self, name="Jugador"):
         self.resources = {
             'Agua': 0,
             'Madera': 0,
             'Comida': 0
         }
         self.money = 100
-        self.name = "Alumno"
-    
+        self.score = 0
+        self.name = name
+
     def add_resources(self, resource_type):
         self.resources[resource_type] += 1
-    
+        self.score += 10  # Ganas 10 puntos por cada recurso
+
     def buy_terrain(self, money):
         self.money -= money
+        self.score += 20  # Ganas 20 puntos por cada terreno conquistado
+    
+    def combat_cost(self):
+        self.money -= 10
 
     def show_resources(self):
         print(f"{self.name} tiene los siguientes recursos:")
-        print("Dinero: ",self.money)
+        print(f"Dinero: {self.money} | Puntuación: {self.score}")
         for resource, amount in self.resources.items():
             print(f"{resource}: {amount}")
 
-class IA:
-    def __init__(self):        
-        self.resources = {
-            'Agua': 0,
-            'Madera': 0,
-            'Comida': 0
-        }
-        self.money = 100
-        self.name = "IA"
-    
-    def add_resources(self, resource_type):
-        self.resources[resource_type] += 1
-    
-    def buy_terrain(self, money):
-        self.money -= money
-
-    def show_resources(self):
-        print(f"{self.name} tiene los siguientes recursos:")
-        print("Dinero: ",self.money)
+# IA similar al jugador
+class IA(Player):
+    def __init__(self):
+        super().__init__(name="IA")
 
 # Territorio como una clase
 class Territory:
@@ -103,6 +94,7 @@ def player_turn(player, map_grid):
                 break
             elif map_grid[x][y].owner == 'C':
                 print("El territorio está ocupado por la IA. ¡A combatir!")
+                player.combat_cost()
                 if combat(player.name):
                     map_grid[x][y].owner = 'J'  # El jugador gana el territorio
                     resource_type = map_grid[x][y].resources
@@ -121,13 +113,16 @@ def ia_turn(ia,map_grid):
         x, y = random.randint(0, MAP_SIZE - 1), random.randint(0, MAP_SIZE - 1)
         if map_grid[x][y].owner == '_':
             map_grid[x][y].owner = 'C'  # 'C' para IA
+            ia.add_resources(map_grid[x][y].resources)
             ia.buy_terrain(map_grid[x][y].cost)
             print(f"La IA ha conquistado el territorio en ({x}, {y})")
             break
         elif map_grid[x][y].owner == 'J':
             print(f"La IA quiere conquistar tu territorio en ({x}, {y}). ¡A combatir!")
+            ia.combat_cost()
             if not combat("Jugador"):  # El jugador defiende el territorio
                 map_grid[x][y].owner = 'C'
+                ia.add_resources(map_grid[x][y].resources)
                 ia.buy_terrain(map_grid[x][y].cost)
                 print(f"La IA ha conquistado tu territorio en ({x}, {y})")
             break
@@ -140,9 +135,20 @@ def is_game_over(map_grid):
                 return False
     return True
 
+def ganador(player, ia):
+    print("\nPuntuaciones finales:")
+    player.show_resources()
+    ia.show_resources()
+
+    if player.score > ia.score:
+        print(f"¡{player.name} gana el juego con {player.score} puntos!")
+    elif player.score < ia.score:
+        print(f"La {ia.name} gana el juego con {ia.score} puntos.")
+    else:
+        print("Es un empate.")
+
 def main():
     print("Inicio de juego")
-    
     player = Player() #Jugador  
     ia= IA()   #IA
     map_grid = create_map()  # Generación aleatoria del mapa
@@ -173,7 +179,7 @@ def main():
 
     # Mostrar recursos finales al terminar el juego
     print("\nEl juego ha terminado.")
-    player.show_resources()
+    ganador(player,ia)
 
 if __name__ == "__main__":
     main()
