@@ -1,0 +1,47 @@
+name: CI/CD Pipeline
+
+# Definir cuándo se ejecuta el workflow (en cada push y en cada pull request a la rama main o feature/*)
+on:
+  push:
+    branches:
+      - main
+      - feature/combate-ia
+      - feature/puntacion-dificultad
+      - develop
+  pull_request:
+    branches:
+      - main
+      - feature/combate-ia
+      - feature/puntacion-dificultad
+      - develop
+
+# Jobs que se van a ejecutar
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Configurar el repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Instalar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # Instalar dependencias
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest behave
+          pip install pytest pytest-mock
+
+      # Ejecutar tests unitarios
+      - name: Run unit tests
+        run: pytest src/tests/
+
+      # Ejecutar pruebas BDD
+      - name: Run BDD tests
+        run: behave src/features/
