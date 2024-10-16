@@ -1,13 +1,15 @@
 name: CI/CD Pipeline
 
-# Definir cuándo se ejecuta el workflow (en cada push y en cada pull request a la rama main)
+# Definir cuándo se ejecuta el workflow (en cada push y en cada pull request a la rama main o feature/*)
 on:
   push:
     branches:
       - main
+      - feature/combate-ia
   pull_request:
     branches:
       - main
+      - feature/combate-ia
 
 # Jobs que se van a ejecutar
 jobs:
