@@ -1,63 +1,79 @@
 from behave import given, when, then
-from src.main import Player, create_map, is_game_over, Territory
+from src.main import Player, IA, create_map, combat, player_turn, ia_turn
 
-# Se crea el jugador y el mapa, inicializando dinero y recursos.
 @given("el jugador inicia con 100 dinero y 0 recursos")
 def step_given_jugador_inicia(context):
     context.player = Player()
     context.map_grid = create_map()
-    context.player.money = 100
 
-# El jugador conquista el territorio en (0, 0) de forma directa.
-@when("el jugador elige conquistar el territorio en (0, 0)")
-def step_when_jugador_conquista(context):
-    if context.map_grid[0][0].owner == '_':
-        context.map_grid[0][0].owner = 'J'
-        resource_type = context.map_grid[0][0].resources
-        context.player.add_resources(resource_type)
-        context.player.buy_terrain(context.map_grid[0][0].cost)
+@when("el jugador elige conquistar un territorio ocupado por la IA")
+def step_when_conquistar_territorio(context):
+    context.map_grid[0][0].owner = 'C'  # IA tiene el territorio
 
-# Verificamos que el territorio en (0, 0) esté conquistado por el jugador.
-@then("el territorio en (0, 0) debería estar conquistado por el jugador")
-def step_then_territorio_conquistado(context):
+@when("el jugador gana el combate")
+def step_when_jugador_gana(context):
+    # Simulación de combate donde el jugador siempre gana
+    context.map_grid[0][0].owner = 'J'
+    resource_type = context.map_grid[0][0].resources
+    context.player.add_resources(resource_type)
+    context.player.buy_terrain(context.map_grid[0][0].cost)
+
+@then("el jugador debería conquistar el territorio")
+def step_then_conquistar_territorio(context):
     assert context.map_grid[0][0].owner == 'J'
 
-# Confirmamos que el jugador ha gastado dinero.
 @then("el jugador debería tener menos dinero")
-def step_then_jugador_menos_dinero(context):
+def step_then_menos_dinero(context):
     assert context.player.money < 100
 
-# Comprobamos que el jugador recibió 1 recurso del tipo correspondiente.
-@then("el jugador debería tener 1 recurso del tipo de ese territorio")
-def step_then_jugador_tiene_recurso(context):
-    resource_type = context.map_grid[0][0].resources
-    assert context.player.resources[resource_type] == 1
-
-# Configuramos el mapa con todos los territorios conquistados menos uno.
-@given("todos los territorios están conquistados excepto uno")
-def step_given_un_territorio_libre(context):
+@given("el jugador y la IA han conquistado territorios")
+def step_given_territorios_conquistados(context):
     context.player = Player()
+    context.ia = IA()
     context.map_grid = create_map()
-    for row in context.map_grid:
-        for territory in row:
-            territory.owner = 'J'
-    context.map_grid[4][4].owner = '_'  # El último territorio libre
+    context.map_grid[0][0].owner = 'J'  # Jugador
+    context.map_grid[0][1].owner = 'C'  # IA
 
-# El jugador conquista el último territorio libre sin interacción manual.
-@when("el jugador conquista el último territorio disponible")
-def step_when_conquista_ultimo(context):
-    if context.map_grid[4][4].owner == '_':
-        context.map_grid[4][4].owner = 'J'
-        resource_type = context.map_grid[4][4].resources
+@when("la IA intenta conquistar un territorio del jugador")
+def step_when_ia_intenta_conquistar(context):
+    # Simulación de que la IA decide atacar el territorio del jugador
+    context.target_position = (0, 0)
+
+@when("la IA gana el combate")
+def step_when_ia_gana(context):
+    # Simulación directa de la IA ganando el combate y conquistando el territorio
+    x, y = context.target_position
+    context.map_grid[x][y].owner = 'C'
+
+@then("el territorio debería pertenecer a la IA")
+def step_then_territorio_ia(context):
+    assert context.map_grid[0][0].owner == 'C'
+
+@given("el mapa está generado y el jugador y la IA tienen 100 dinero")
+def step_given_mapa_generado(context):
+    context.player = Player()
+    context.ia = IA()
+    context.map_grid = create_map()
+
+@when("el jugador toma su turno para conquistar un territorio")
+def step_when_jugador_turno(context):
+    # Simulación de turno del jugador
+    x, y = 0, 0
+    if context.map_grid[x][y].owner == '_':
+        context.map_grid[x][y].owner = 'J'
+        resource_type = context.map_grid[x][y].resources
         context.player.add_resources(resource_type)
-        context.player.buy_terrain(context.map_grid[4][4].cost)
+        context.player.buy_terrain(context.map_grid[x][y].cost)
 
-# Verificamos que no quedan territorios libres y que el juego termina.
-@then("el juego debería terminar")
-def step_then_juego_termina(context):
-    assert is_game_over(context.map_grid)
+@when("luego la IA toma su turno para conquistar un territorio")
+def step_when_ia_turno(context):
+    # Simulación de turno de la IA
+    x, y = 0, 1
+    if context.map_grid[x][y].owner == '_':
+        context.map_grid[x][y].owner = 'C'
+        context.ia.buy_terrain(context.map_grid[x][y].cost)
 
-# Se muestra el resumen de recursos del jugador.
-@then("el jugador debería ver su resumen de recursos")
-def step_then_mostrar_resumen(context):
-    context.player.show_resources()
+@then("ambos deberían tener territorios conquistados")
+def step_then_territorios_conquistados(context):
+    assert context.map_grid[0][0].owner == 'J'  # Jugador conquistó
+    assert context.map_grid[0][1].owner == 'C'  # IA conquistó

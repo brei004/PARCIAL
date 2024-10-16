@@ -132,29 +132,21 @@ def player_turn(player, map_grid):
             print("Entrada inválida. Ingresa coordenadas válidas.")
 
 # Turno de la IA
-def ia_turn(ia, map_grid):
+def ia_turn(ia,map_grid):
     while True:
-        # La IA elige coordenadas aleatorias en el mapa
         x, y = random.randint(0, MAP_SIZE - 1), random.randint(0, MAP_SIZE - 1)
-        
-        # Si el territorio está libre, la IA lo conquista
         if map_grid[x][y].owner == '_':
-            map_grid[x][y].owner = 'C'  # 'C' representa que la IA lo posee
-            ia.buy_terrain(map_grid[x][y].cost)  # La IA paga por el terreno
+            map_grid[x][y].owner = 'C'  # 'C' para IA
+            ia.buy_terrain(map_grid[x][y].cost)
             print(f"La IA ha conquistado el territorio en ({x}, {y})")
-            break  # Se termina el turno de la IA
-        
-        # Si el territorio ya le pertenece al jugador, la IA intenta conquistarlo
+            break
         elif map_grid[x][y].owner == 'J':
             print(f"La IA quiere conquistar tu territorio en ({x}, {y}). ¡A combatir!")
-            
-            # Se inicia el combate. Si la IA gana, conquista el territorio del jugador
-            if not combat("Jugador"):  # Llamo "Jugador" porque él está defendiendo
-                map_grid[x][y].owner = 'C'  # La IA se queda con el territorio
-                ia.buy_terrain(map_grid[x][y].cost)  # Y paga por él
+            if not combat("Jugador"):  # El jugador defiende el territorio
+                map_grid[x][y].owner = 'C'
+                ia.buy_terrain(map_grid[x][y].cost)
                 print(f"La IA ha conquistado tu territorio en ({x}, {y})")
-            break  # Termina el turno
-
+            break
 
 # Verificar si hay territorios disponibles
 def is_game_over(map_grid):
