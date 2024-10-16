@@ -1,5 +1,5 @@
 from behave import given, when, then
-from main import Player, create_map, is_game_over, Territory
+from src.main import Player, create_map, is_game_over, Territory
 
 # Se crea el jugador y el mapa, inicializando dinero y recursos.
 @given("el jugador inicia con 100 dinero y 0 recursos")
