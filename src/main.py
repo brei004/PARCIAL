@@ -16,12 +16,8 @@ class Player:
             'Madera': 0,
             'Comida': 0
         }
-<<<<<<< HEAD:src/main.py
-        self.money = 100 #Dinero disponible
-=======
         self.money = 100
         self.name = "Alumno"
->>>>>>> 83f4e85 (Combate ppt y clase ia):main.py
     
     def add_resources(self, resource_type): #Funcion para ganar recursos
         self.resources[resource_type] += 1
@@ -29,13 +25,8 @@ class Player:
     def buy_terrain(self, money): #Funcion para gastar dinero
         self.money -= money
 
-<<<<<<< HEAD:src/main.py
-    def show_resources(self): #Funcion para mostar los recursos actuales
-        print(f"Player tiene los siguientes recursos:")
-=======
     def show_resources(self):
         print(f"{self.name} tiene los siguientes recursos:")
->>>>>>> 83f4e85 (Combate ppt y clase ia):main.py
         print("Dinero: ",self.money)
         for resource, amount in self.resources.items():
             print(f"{resource}: {amount}")
@@ -83,19 +74,30 @@ def display_map(map_grid):
 
 # Sistema de combate: Piedra, Papel o Tijera
 def combat(player_name):
+    # Le pedimos al jugador que elija su movimiento
     player_move = input("Elige tu movimiento (Piedra, Papel, Tijera): ")
+    
+    # La IA elige un movimiento aleatorio
     ia_move = random.choice(MOVES)
     print(f"La IA ha jugado: {ia_move}")
 
+    # Si hay empate, vuelve a jugarse
     if player_move == ia_move:
         print("¡Empate! Jueguen de nuevo.")
-        return combat(player_name)  # Reintenta en caso de empate
-    elif (player_move == 'Piedra' and ia_move == 'Tijera') or (player_move == 'Papel' and ia_move == 'Piedra') or (player_move == 'Tijera' and ia_move == 'Papel'):
+        return combat(player_name)  # Se llama otra vez hasta que no haya empate
+
+    # Condiciones donde el jugador gana el combate
+    elif (player_move == 'Piedra' and ia_move == 'Tijera') or \
+         (player_move == 'Papel' and ia_move == 'Piedra') or \
+         (player_move == 'Tijera' and ia_move == 'Papel'):
         print(f"{player_name} gana el combate!")
-        return True
+        return True  # Si el jugador gana, devuelve True
+
+    # En cualquier otro caso, la IA gana
     else:
         print("La IA gana el combate!")
-        return False
+        return False  # Devuelve False si la IA gana
+
 
 # Turno del jugador
 def player_turn(player, map_grid):
@@ -130,21 +132,29 @@ def player_turn(player, map_grid):
             print("Entrada inválida. Ingresa coordenadas válidas.")
 
 # Turno de la IA
-def ia_turn(ia,map_grid):
+def ia_turn(ia, map_grid):
     while True:
+        # La IA elige coordenadas aleatorias en el mapa
         x, y = random.randint(0, MAP_SIZE - 1), random.randint(0, MAP_SIZE - 1)
+        
+        # Si el territorio está libre, la IA lo conquista
         if map_grid[x][y].owner == '_':
-            map_grid[x][y].owner = 'C'  # 'C' para IA
-            ia.buy_terrain(map_grid[x][y].cost)
+            map_grid[x][y].owner = 'C'  # 'C' representa que la IA lo posee
+            ia.buy_terrain(map_grid[x][y].cost)  # La IA paga por el terreno
             print(f"La IA ha conquistado el territorio en ({x}, {y})")
-            break
+            break  # Se termina el turno de la IA
+        
+        # Si el territorio ya le pertenece al jugador, la IA intenta conquistarlo
         elif map_grid[x][y].owner == 'J':
             print(f"La IA quiere conquistar tu territorio en ({x}, {y}). ¡A combatir!")
-            if not combat("Jugador"):  # El jugador defiende el territorio
-                map_grid[x][y].owner = 'C'
-                ia.buy_terrain(map_grid[x][y].cost)
+            
+            # Se inicia el combate. Si la IA gana, conquista el territorio del jugador
+            if not combat("Jugador"):  # Llamo "Jugador" porque él está defendiendo
+                map_grid[x][y].owner = 'C'  # La IA se queda con el territorio
+                ia.buy_terrain(map_grid[x][y].cost)  # Y paga por él
                 print(f"La IA ha conquistado tu territorio en ({x}, {y})")
-            break
+            break  # Termina el turno
+
 
 # Verificar si hay territorios disponibles
 def is_game_over(map_grid):
