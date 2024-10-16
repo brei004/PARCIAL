@@ -31,9 +31,8 @@ class Player:
 # Territorio como una clase
 class Territory:
     def __init__(self):
-        self.terrain = random.choice(TERRAIN_TYPES)
-        self.cost = random.randint(5,10)
-        self.resources = random.choice(RESOURCE_TYPES)
+        self.terrain = random.choice(TERRAIN_TYPES) #Eleccion aleatoria de terreno
+        self.resources = random.choice(RESOURCE_TYPES)#Eleccion aleatoria de recurso
         self.owner = '_'  # Sin conquistar: '_', Jugador: 'J', Computadora: 'C'
     
     def __str__(self):
@@ -45,8 +44,8 @@ def create_map():
 
 # Mostrar el mapa
 def display_map(map_grid):
-    for row in map_grid:
-        print(' '.join(str(territory) for territory in row))
+    for row in map_grid: #Para cada fila
+        print(' '.join(str(territory) for territory in row)) #Imprimimos cada terreno
     print()
 
 # Turno del jugador
