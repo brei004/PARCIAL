@@ -1,5 +1,5 @@
 import random
-
+import re
 MAP_SIZE_BASE = 2
 
 # Diferentes tipos de territorios
@@ -44,7 +44,7 @@ class IA(Player):
 
 # Territorio como una clase
 class Territory:
-    def __init__(self,difficulty):
+    def __init__(self,difficulty=1):
         self.terrain = random.choice(TERRAIN_TYPES)
         self.cost = random.randint(5* difficulty,10 * difficulty)
         self.resources = random.choice(RESOURCE_TYPES)
@@ -54,7 +54,7 @@ class Territory:
         return f"{self.terrain[0]}-{self.resources[0]}-{self.cost}$-#{self.owner}"    
 
 # Crear el mapa de territorios
-def create_map(difficulty):
+def create_map(difficulty=1):
     MAP_SIZE = difficulty * MAP_SIZE_BASE
     return [[Territory(difficulty) for _ in range(MAP_SIZE)] for _ in range(MAP_SIZE)]
 
@@ -64,27 +64,51 @@ def display_map(map_grid):
         print(' '.join(str(territory) for territory in row))
     print()
 
+def validate_combat_move(input_str):
+    # Regex para aceptar solo 'Piedra', 'Papel' o 'Tijera' 
+    pattern = r'^(Piedra|Papel|Tijera)$'
+    return re.match(pattern, input_str, re.IGNORECASE) is not None
+
 # Sistema de combate: Piedra, Papel o Tijera
 def combat(player_name):
-    player_move = input("Elige tu movimiento (Piedra, Papel, Tijera): ")
-    ia_move = random.choice(MOVES)
-    print(f"La IA ha jugado: {ia_move}")
+    while True:
+        player_move = input("Elige tu movimiento (Piedra, Papel, Tijera): ")
+        if not validate_combat_move(player_move):
+            print("Movimiento inválido. Por favor elige 'Piedra', 'Papel' o 'Tijera'.")
+            continue
+        
+        ia_move = random.choice(MOVES)
+        print(f"La IA ha jugado: {ia_move}")
 
-    if player_move == ia_move:
-        print("¡Empate! Jueguen de nuevo.")
-        return combat(player_name)  # Reintenta en caso de empate
-    elif (player_move == 'Piedra' and ia_move == 'Tijera') or (player_move == 'Papel' and ia_move == 'Piedra') or (player_move == 'Tijera' and ia_move == 'Papel'):
-        print(f"{player_name} gana el combate!")
-        return True
-    else:
-        print("La IA gana el combate!")
-        return False
+        if player_move == ia_move:
+            print("¡Empate! Jueguen de nuevo.")
+            continue  # Evitar recursión, usa bucle para reintentar en caso de empate
+        elif (player_move == 'Piedra' and ia_move == 'Tijera') or (player_move == 'Papel' and ia_move == 'Piedra') or (player_move == 'Tijera' and ia_move == 'Papel'):
+            print(f"{player_name} gana el combate!")
+            return True
+        else:
+            print("La IA gana el combate!")
+            return False
+
+
+
+
+def validate_coordinates(input_str):
+    # Regex para validar que la entrada sea dos números separados por un espacio
+    pattern = r'^\d+\s\d+$'
+    return re.match(pattern, input_str) is not None
 
 # Turno del jugador
 def player_turn(player, map_grid):
     while True:
         try:
-            x, y = map(int, input("Ingresa las coordenadas del territorio que quieres conquistar (x y): ").split())
+            # Usar la función de validación para verificar las coordenadas
+            user_input = input("Ingresa las coordenadas del territorio que quieres conquistar (x y): ")
+            if not validate_coordinates(user_input):
+                print("Entrada inválida. Debe ingresar dos números separados por un espacio.")
+                continue  # Solicita la entrada nuevamente si no es válida
+            
+            x, y = map(int, user_input.split())
             if map_grid[x][y].owner == '_':
                 map_grid[x][y].owner = 'J'  # 'J' para jugador
                 resource_type = map_grid[x][y].resources
@@ -128,12 +152,18 @@ def ia_turn(ia,map_grid):
                 ia.buy_terrain(map_grid[x][y].cost)
                 print(f"La IA ha conquistado tu territorio en ({x}, {y})")
             break
-def nivel():
+def validate_difficulty(input_str):
+    # Regex para aceptar solo '1', '2' o '3'
+    pattern = r'^[1-3]$'
+    return re.match(pattern, input_str) is not None
+
+def nivel(difficulty=1):
     while True:
         difficulty = input("Selecciona la dificultad (1: Fácil, 2: Media, 3: Difícil): ")
-        if difficulty in ['1', '2', '3']:
+        if validate_difficulty(difficulty):
             return int(difficulty)
         print("Dificultad no válida, intenta de nuevo.")
+
 
 # Verificar si hay territorios disponibles
 def is_game_over(map_grid):
