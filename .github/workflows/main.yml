@@ -7,11 +7,13 @@ on:
       - main
       - feature/combate-ia
       - feature/puntacion-dificultad
+      - develop
   pull_request:
     branches:
       - main
       - feature/combate-ia
       - feature/puntacion-dificultad
+      - develop
 
 # Jobs que se van a ejecutar
 jobs:
