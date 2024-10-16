@@ -1,5 +1,5 @@
 from behave import given, when, then
-from main import create_map
+from src.main import create_map
 
 @given("el jugador inicia el juego")
 def step_given_jugador_inicia_el_juego(context):
