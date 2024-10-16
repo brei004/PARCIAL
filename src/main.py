@@ -1,5 +1,17 @@
+from prometheus_client import Counter, Gauge, start_http_server
 import random
 import re
+import time
+
+# Definición de métricas
+player_score = Gauge('player_score', 'Puntuación actual del jugador')
+ia_score = Gauge('ia_score', 'Puntuación actual de la IA')
+player_resources = Counter('player_resources_collected', 'Recursos recolectados por el jugador', ['resource'])
+ia_resources = Counter('ia_resources_collected', 'Recursos recolectados por la IA', ['resource'])
+
+# Iniciar servidor de métricas Prometheus
+start_http_server(8000)
+
 MAP_SIZE_BASE = 2
 
 # Diferentes tipos de territorios
@@ -23,6 +35,8 @@ class Player:
     def add_resources(self, resource_type):
         self.resources[resource_type] += 1
         self.score += 10  # Ganas 10 puntos por cada recurso
+        player_resources.labels(resource_type).inc()  # Incrementar contador de recursos
+        player_score.set(self.score) # Actualizar metricas
 
     def buy_terrain(self, money):
         self.money -= money
