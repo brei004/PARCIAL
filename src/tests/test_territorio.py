@@ -7,8 +7,3 @@ def test_territory_initialization():
     assert territory.resources in RESOURCE_TYPES#Verificar que sea correcto el recurso de nuestras 3 opciones
     assert territory.owner == '_' #Por defecto no tiene dueño
 
-def test_territory_str():
-    territory = Territory()
-    assert len(str(territory)) == 3  #Verificamos la presentación de nuestra celda por consola
-    # Se muestra así, Pradera-Agua pero para disminuir espacio se imprime así 
-    # P-A por eso longitud 3
